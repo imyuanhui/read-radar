@@ -1,13 +1,100 @@
 {% extends 'base.html' %} {% block head %}
 <title>Read Radar</title>
 {% endblock %} {% block body %}
-<h1>Hello</h1>
-<div id="display"></div>
-<form>
-  <input type="text" name="title" id="title" />
-  <input type="text" name="author" id="author" />
-  <input type="text" name="year" id="year" />
-  <input type="text" name="genre" id="genre" />
-  <button id="add">Add New Record</button>
+<h1>Book Records</h1>
+
+{% if books %}
+<table
+  border="1"
+  style="width: 100%; border-collapse: collapse; text-align: left"
+>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Author</th>
+      <th>Published Year</th>
+      <th>Genres</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for book in books %}
+    <tr>
+      <td>{{ book.title }}</td>
+      <td>{{ book.author }}</td>
+      <td>{{ book.year }}</td>
+      <td>
+        {% if book.genres %} {{ book.genres|map(attribute='genre')|join(", ") }}
+        {% else %} - {% endif %}
+      </td>
+      <td>
+        <a
+          href="/delete/{{ book.id }}"
+          style="color: red; text-decoration: none"
+          >Delete</a
+        >
+        |
+        <a
+          href="/update/{{ book.id }}"
+          style="color: blue; text-decoration: none"
+          >Edit</a
+        >
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No books added yet. Start adding some!</p>
+{% endif %}
+
+<h2>Add a New Book</h2>
+<form action="/" method="POST" style="max-width: 400px; margin-top: 20px">
+  <div style="margin-bottom: 10px">
+    <label for="title" style="display: block">Title:</label>
+    <input type="text" name="title" id="title" required style="width: 100%" />
+  </div>
+  <div style="margin-bottom: 10px">
+    <label for="author" style="display: block">Author:</label>
+    <input type="text" name="author" id="author" required style="width: 100%" />
+  </div>
+  <div style="margin-bottom: 10px">
+    <label for="year" style="display: block">Published Year:</label>
+    <input type="number" name="year" id="year" required style="width: 100%" />
+  </div>
+  <div style="margin-bottom: 10px">
+    <label for="genres" style="display: block">Genres (comma-separated):</label>
+    <input type="text" name="genres" id="genres" style="width: 100%" />
+  </div>
+  <button
+    type="submit"
+    style="
+      padding: 10px 20px;
+      background-color: green;
+      color: white;
+      border: none;
+      cursor: pointer;
+    "
+  >
+    Add New Record
+  </button>
+</form>
+<form action="/upload" method="POST">
+  <div style="margin-bottom: 10px">
+    <label for="file" style="display: block">Upload a text file:</label>
+    <input type="file" name="file" id="file" required style="width: 100%" />
+  </div>
+  <button
+    type="submit"
+    style="
+      padding: 10px 20px;
+      background-color: blue;
+      color: white;
+      border: none;
+      cursor: pointer;
+    "
+  >
+    Import Records from Text File
+  </button>
 </form>
 {% endblock %}
