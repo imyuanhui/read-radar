@@ -155,6 +155,14 @@ def preferences():
     except Exception as e:
         return f"Error: {e}"
 
+@app.route("/recommend/<int:id>")
+def recommend(id:int):
+    try:
+        book = Book.find_book_by_id(id)
+        return render_template("recommendation.html", similar_books = Book.find_similar_books(id), book=book)
+    except Exception as e:
+        return f"Error: {e}"
+
 if __name__ in "__main__":
     with app.app_context():
         db.create_all()

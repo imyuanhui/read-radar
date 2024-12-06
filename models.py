@@ -110,6 +110,23 @@ class Book(db.Model):
         authors = db.session.query(Book.author, func.count(Book.id).label("count")).group_by(Book.author).order_by(func.count(Book.id).desc()).limit(limit).all()
         top_authors = [(author, count) for author, count in authors]
         return top_authors
+    
+    @staticmethod
+    def find_similar_books(id):
+        target = Book.find_book_by_id(id)
+        if not target:
+            return f"Book not found in the database.", 404
+        similar_books = []
+        for book in Book.get_all_books():
+            if book.title != target.title:
+                if  book.author == target.author:
+                    similar_books.append(book)
+                else:
+                    for genre in book.genres:
+                        if genre in target.genres:
+                            similar_books.append(book)
+                            continue
+        return sorted(similar_books, key=(lambda book: 0 if book.author == target.author else 1 + len(target.genres) - len(set(target.genres) & set(book.genres))))[:min(5, len(similar_books))]
 
 class Genre(db.Model):
     id = db.Column(db.Integer, primary_key=True)

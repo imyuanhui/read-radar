@@ -1,0 +1,19 @@
+{% extends 'base.html' %} {% block head %}
+<title>Read Radar</title>
+{% endblock %} {% block body %}
+<h3>These are books similar with {{book.title}}</h3>
+{% if similar_books %}
+<ol>
+  {% for book in similar_books %}
+  <li>
+    {{ book.title }} <br />
+    Author: {{book.author}} <br />
+    Published Year: {{book.year}} <br />
+    Genres: {% if book.genres %} {{ book.genres|map(attribute='genre')|join(",
+    ") }} {% else %} - {% endif %}
+  </li>
+  {% endfor %}
+</ol>
+{% else %}
+<p>No similar books found in the database.</p>
+{% endif %} {% endblock %}
