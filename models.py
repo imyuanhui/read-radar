@@ -118,9 +118,6 @@ class Genre(db.Model):
     def __repr__(self):
         return f"{self.genre}"
     
-    # def toString(self):
-    #     return self.__repr__()
-    
     @staticmethod
     def get_all_genres():
         return Genre.query.order_by('genre').all()
@@ -139,3 +136,8 @@ class Genre(db.Model):
         except Exception as e:
             print(f"Error: {e}")
             return f"Error: {e}"
+    
+    @staticmethod
+    def genre_distribution(limit):
+        genres = db.session.query(Genre.genre, func.count(book_genre_table.c.book_id).label("count")).join(book_genre_table, Genre.id == book_genre_table.c.genre_id).group_by(Genre.genre).order_by(func.count(book_genre_table.c.book_id).desc()).limit(limit).all()
+        return genres

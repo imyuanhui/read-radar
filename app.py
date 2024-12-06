@@ -138,7 +138,9 @@ def preferences():
     try:
         top3_authors = Book.top_authors(3)
         # Analyse genre distribution
-        return f"Top3 authors: {top3_authors}"
+        top6_genres = Genre.genre_distribution(6)
+        
+        return f"Top3 authors: {top3_authors}, Top6 genres: {top6_genres}"
     except Exception as e:
         return f"Error: {e}"
 
