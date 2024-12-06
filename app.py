@@ -75,6 +75,38 @@ def upload_file():
     except Exception as e:
         return f"Error: {e}", 500
 
+@app.route("/delete/<int:id>")
+def delete(id:int):
+    try:
+        Book.delete_book(id)
+        return redirect("/")
+    except Exception as e:
+        return f"Error: {e}"
+
+@app.route("/update/<int:id>", methods=["GET", "POST"])
+def update(id:int):
+    book_to_update = Book.find_book_by_id(id)
+    if book_to_update:
+        if request.method == "POST":
+            data = request.form
+            genres = [genre.strip() for genre in data['genres'].split(",")]
+            try:
+                result = Book.update_book(
+                    id,
+                    new_title=data.get('title'),
+                    new_author=data.get('author'),
+                    new_year=data.get('year'),
+                    new_genres=genres
+                )
+                if isinstance(result, str) and result.startswith("Error"):
+                    return result, 400
+                return redirect("/")
+            except Exception as e:
+                return f"Error: {e}", 500
+        else:
+            return render_template("update.html", book=book_to_update)
+
+
 if __name__ in "__main__":
     with app.app_context():
         db.create_all()

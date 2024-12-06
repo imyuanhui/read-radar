@@ -13,7 +13,7 @@ class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), unique=True, nullable=False)
     author = db.Column(db.String(80), nullable=False)
-    year = db.Column(db.Integer)
+    year = db.Column(db.Integer, nullable=False)
     genres = db.relationship('Genre', secondary=book_genre_table, backref='books')
 
     def __repr__(self):
@@ -26,6 +26,10 @@ class Book(db.Model):
     @staticmethod
     def find_book_by_title(t):
         return Book.query.filter_by(title=t).first()
+    
+    @staticmethod
+    def find_book_by_id(id):
+        return Book.query.filter_by(id=id).first()
 
     @staticmethod
     def add_new_book(title, author, year, genres):
@@ -61,6 +65,37 @@ class Book(db.Model):
         year = int(info[2])
         genres = [genre.strip('[]') for genre in info[3:]]
         return Book.add_new_book(title, author, year, genres)
+    
+    @staticmethod
+    def delete_book(id):
+        book = Book.query.get_or_404(id)
+        try:
+            db.session.delete(book)
+            db.session.commit()
+        except Exception as e:
+            return f"Error: {e}"
+    
+    @staticmethod
+    def update_book(id, new_title=None, new_author=None, new_year=None, new_genres=None):
+        book = Book.query.get_or_404(id)
+        book.title = new_title if new_title else book.title
+        book.author = new_author if new_author else book.author
+        book.year = new_year if new_year else book.year
+        
+        if new_genres is not None:
+            book.genres.clear()
+
+            for g in new_genres:
+                existing_genre = Genre.find_genre(g)
+                if existing_genre:
+                    book.genres.append(existing_genre)
+                else:
+                    new_genre = Genre.add_new_genre(g)
+                    book.genres.append(new_genre)
+        try:
+            db.session.commit()
+        except Exception as e:
+            return f"Error: {e}"
 
 class Genre(db.Model):
     id = db.Column(db.Integer, primary_key=True)
