@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 from models import db, Book, Genre
 import os
+import plotly.graph_objects as go
 
 app = Flask(__name__)
 
@@ -24,14 +25,24 @@ def cleanup_upload_folder():
     for f in files:
         os.remove(os.path.join(app.config["UPLOAD_FOLDER"], f))
 
-def get_book_counts_by_author(books):
-    counts_by_author = {}
-    for book in books:
-        if book.author not in counts_by_author.keys():
-            counts_by_author[book.author] = 1
-        else:
-            counts_by_author[book.author] += 1
-    return counts_by_author
+def draw_radar_chart(labels, values):
+    fig = go.Figure(data=go.Scatterpolar(
+        r=values,
+        theta=labels,
+        fill='toself',
+    ))
+
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, max(values) + 1] if values else [0, 1]
+            ),
+        ),
+        showlegend=False
+    )
+
+    return fig
 
 # Routes
 @app.route("/", methods=['POST', 'GET'])
@@ -139,8 +150,8 @@ def preferences():
         top3_authors = Book.top_authors(3)
         # Analyse genre distribution
         top6_genres = Genre.genre_distribution(6)
-        
-        return f"Top3 authors: {top3_authors}, Top6 genres: {top6_genres}"
+        chart = draw_radar_chart([g[0] for g in top6_genres], [g[1] for g in top6_genres])
+        return render_template("preferences.html", authors=top3_authors, chart=chart.to_html())
     except Exception as e:
         return f"Error: {e}"
 
