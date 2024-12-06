@@ -1,3 +1,59 @@
 body {
-    background-color: aqua;
+  margin: 0;
+  padding: 0;
+}
+
+.background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("/static/images/bookshelf.jpg");
+  background-size: cover;
+  background-position: center;
+  /* opacity: 0.7; Adjust opacity here */
+  z-index: -1;
+}
+
+.nav {
+  width: 100%;
+  height: 3rem;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 2;
+  font-family: fantasy;
+  font-size: 2rem;
+  a {
+    text-decoration: none;
+
+    color: brown;
+    padding: 0.5rem;
+    background-color: bisque;
+    border-radius: 1rem;
+  }
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.records {
+  width: 80%;
+  background-color: white;
+  opacity: 0.6;
+  color: black;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  padding: 1rem;
+  height: 100vh;
+  overflow-y: scroll;
+  h1 {
+    text-align: center;
+  }
 }

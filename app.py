@@ -1,9 +1,7 @@
 from flask import Flask, render_template, redirect, request, send_from_directory, url_for
-from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 from models import db, Book, Genre
 import os
-import plotly.graph_objects as go
 from utils import allowed_file, cleanup_upload_folder, draw_radar_chart
 
 app = Flask(__name__)
