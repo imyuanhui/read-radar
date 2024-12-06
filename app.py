@@ -24,6 +24,15 @@ def cleanup_upload_folder():
     for f in files:
         os.remove(os.path.join(app.config["UPLOAD_FOLDER"], f))
 
+def get_book_counts_by_author(books):
+    counts_by_author = {}
+    for book in books:
+        if book.author not in counts_by_author.keys():
+            counts_by_author[book.author] = 1
+        else:
+            counts_by_author[book.author] += 1
+    return counts_by_author
+
 # Routes
 @app.route("/", methods=['POST', 'GET'])
 def home():
@@ -124,6 +133,14 @@ def update(id:int):
         else:
             return render_template("update.html", book=book_to_update)
 
+@app.route("/preferences")
+def preferences():
+    try:
+        top3_authors = Book.top_authors(3)
+        # Analyse genre distribution
+        return f"Top3 authors: {top3_authors}"
+    except Exception as e:
+        return f"Error: {e}"
 
 if __name__ in "__main__":
     with app.app_context():

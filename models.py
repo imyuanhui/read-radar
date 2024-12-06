@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask import redirect
+from sqlalchemy import func
 
 db = SQLAlchemy()
 
@@ -103,6 +104,12 @@ class Book(db.Model):
             for book in Book.get_all_books():
                 line = f"{book.title}, {book.author}, {book.year}, {[str(g) for g in book.genres]}\n"
                 f.write(line)
+    
+    @staticmethod
+    def top_authors(limit):
+        authors = db.session.query(Book.author, func.count(Book.id).label("count")).group_by(Book.author).order_by(func.count(Book.id).desc()).limit(limit).all()
+        top_authors = [(author, count) for author, count in authors]
+        return top_authors
 
 class Genre(db.Model):
     id = db.Column(db.Integer, primary_key=True)
