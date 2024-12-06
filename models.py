@@ -96,13 +96,23 @@ class Book(db.Model):
             db.session.commit()
         except Exception as e:
             return f"Error: {e}"
+    
+    @staticmethod
+    def export_books(filepath):
+        with open(filepath, 'w') as f:
+            for book in Book.get_all_books():
+                line = f"{book.title}, {book.author}, {book.year}, {[str(g) for g in book.genres]}\n"
+                f.write(line)
 
 class Genre(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     genre = db.Column(db.String(50), unique=True, nullable=False)
 
     def __repr__(self):
-        return self.genre
+        return f"{self.genre}"
+    
+    # def toString(self):
+    #     return self.__repr__()
     
     @staticmethod
     def get_all_genres():

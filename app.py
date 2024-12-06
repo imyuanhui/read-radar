@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, url_for
+from flask import Flask, render_template, redirect, request, send_from_directory, url_for
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 from models import db, Book, Genre
@@ -75,6 +75,24 @@ def upload_file():
     except Exception as e:
         return f"Error: {e}", 500
 
+@app.route("/download", methods=["GET", "POST"])
+def download_file():
+    if request.method == "POST":
+        filename = request.form["filename"].strip()
+        if "." in filename:
+            filename = filename.split(".")[0]
+        filename = filename.strip()
+
+        if not filename:
+            filename = "readradar_myBooks.txt"
+        try:
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], f"{filename}.txt")
+            Book.export_books(filepath)
+            return send_from_directory(app.config['UPLOAD_FOLDER'], f"{filename}.txt", as_attachment=True)
+        except Exception as e:
+            return f"Error: {e}"
+    return render_template("download_form.html")
+        
 @app.route("/delete/<int:id>")
 def delete(id:int):
     try:
