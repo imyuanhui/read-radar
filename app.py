@@ -6,63 +6,74 @@ import os
 
 app = Flask(__name__)
 
+# Configuration
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
-app.config["UPLOAD_FOLDER"] = "uploads"  # Folder for uploaded files
-app.config["ALLOWED_EXTENSIONS"] = {"txt"}  # Allowed file extensions
+app.config["UPLOAD_FOLDER"] = "uploads"
+app.config["ALLOWED_EXTENSIONS"] = {"txt"}
+
 db.init_app(app)
 
-# Check if file extension is allowed
+# Utility functions
 def allowed_file(filename):
+    """Check if the uploaded file has an allowed extension."""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
+def cleanup_upload_folder():
+    """Remove all files from the upload folder."""
+    files = os.listdir(app.config["UPLOAD_FOLDER"])
+    for f in files:
+        os.remove(os.path.join(app.config["UPLOAD_FOLDER"], f))
+
+# Routes
 @app.route("/", methods=['POST', 'GET'])
 def home():
-    # Add a new record
     if request.method == 'POST':
+        # Handle adding a new book
         data = request.form
         genres = [genre.strip() for genre in data['genres'].split(",")]
-        Book.add_new_book(data['title'], data['author'], data['year'], genres)
+        try:
+            Book.add_new_book(data['title'], data['author'], data['year'], genres)
+            return redirect("/")
+        except Exception as e:
+            return f"Error: {e}"
         
-    # Get all records
+    # Handle displaying all books
     if request.method == 'GET':
+        cleanup_upload_folder() # clear cached files
         books = Book.get_all_books()
         return render_template("index.html", books=books)
 
-    return render_template("index.html")
-
 @app.route("/upload", methods=['POST'])
 def upload_file():
-    if 'file' not in request.files:
-        return redirect(request.url)
+    if "file" not in request.files:
+        return "No file uploaded", 400
     
-    file = request.files['file']
+    file = request.files["file"]
 
-    if file.filename == '':
-        return redirect(request.url)
+    if file.filename == "":
+        return "No selected file", 400
     
-    if file and allowed_file(file.filename):
-        # Save the file temporarily
+    if file and not allowed_file(file.filename):
+        return "File type not allowed", 400
+    
+    try:
+        # Save the uploaded file
         filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        
-        try:
-            with open(filename, 'r') as f:
-                for line in f.readlines():
-                    info = [piece.strip() for piece in line.split(",")]
-                    if len(info) < 4 or '[' not in line or ']' not in line:
-                        raise ValueError('Invalid file line format.')
-                    title = info[0]
-                    author = info[1]
-                    year = int(info[2])
-                    genres = [genre.strip('[]') for genre in info[3:]]
-                    try:
-                        Book.add_new_book(title, author, year, genres)
-                    except ValueError as e:
-                        print('Skip invalid line:', e)
-        except Exception as e:
-            print(f"Error: {e}")
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)  # Ensure upload folder exists
+        file.save(filepath)
 
-    return redirect("/")
+        with open(filepath, "r") as f:
+            for line in f.readlines():
+                try:
+                    Book.import_new_book(line)
+                except ValueError as e:
+                    print("Skip invalid line:", e)
+                except Exception as e:
+                    print(f"Error processing line: {e}")
+        return redirect('/')
+    except Exception as e:
+        return f"Error: {e}", 500
 
 if __name__ in "__main__":
     with app.app_context():
