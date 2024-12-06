@@ -79,22 +79,8 @@
     Add New Record
   </button>
 </form>
-<form action="/upload" method="POST">
-  <div style="margin-bottom: 10px">
-    <label for="file" style="display: block">Upload a text file:</label>
-    <input type="file" name="file" id="file" required style="width: 100%" />
-  </div>
-  <button
-    type="submit"
-    style="
-      padding: 10px 20px;
-      background-color: blue;
-      color: white;
-      border: none;
-      cursor: pointer;
-    "
-  >
-    Import Records from Text File
-  </button>
-</form>
+<div>
+  <h2>Import Books From Textfile</h2>
+  {% include 'upload_form.html' %}
+</div>
 {% endblock %}
