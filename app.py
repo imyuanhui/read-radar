@@ -16,6 +16,9 @@ db.init_app(app)
 # Routes
 @app.route("/", methods=['POST', 'GET'])
 def home():
+    """
+    Home route to handle adding a new book (POST) and displaying all books (GET).
+    """
     if request.method == 'POST':
         # Handle adding a new book
         data = request.form
@@ -26,14 +29,18 @@ def home():
         except Exception as e:
             return f"Error: {e}"
         
-    # Handle displaying all books
     if request.method == 'GET':
+        # Handle displaying all books
         cleanup_upload_folder() # clear cached files
         books = Book.get_all_books()
         return render_template("index.html", books=books)
 
+
 @app.route("/upload", methods=['POST'])
 def upload_file():
+    """
+    Route to upload a file and import book records from it.
+    """
     if "file" not in request.files:
         return "No file uploaded", 400
     
@@ -51,7 +58,8 @@ def upload_file():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)  # Ensure upload folder exists
         file.save(filepath)
-
+        
+        # Process each line in the file to add books
         with open(filepath, "r") as f:
             for line in f.readlines():
                 try:
@@ -66,7 +74,11 @@ def upload_file():
 
 @app.route("/download", methods=["GET", "POST"])
 def download_file():
+    """
+    Route to export book records to a file and allow the user to download it.
+    """
     if request.method == "POST":
+        # Retrieve and sanitize the filename
         filename = request.form["filename"].strip()
         if "." in filename:
             filename = filename.split(".")[0]
@@ -75,6 +87,7 @@ def download_file():
         if not filename:
             filename = "readradar_myBooks.txt"
         try:
+            # Export books and send file to user
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], f"{filename}.txt")
             Book.export_books(filepath)
             return send_from_directory(app.config['UPLOAD_FOLDER'], f"{filename}.txt", as_attachment=True)
@@ -84,6 +97,9 @@ def download_file():
         
 @app.route("/delete/<int:id>")
 def delete(id:int):
+    """
+    Route to delete a specific book by its ID.
+    """
     try:
         Book.delete_book(id)
         return redirect("/")
@@ -92,6 +108,9 @@ def delete(id:int):
 
 @app.route("/update/<int:id>", methods=["GET", "POST"])
 def update(id:int):
+    """
+    Route to update details of a specific book by its ID.
+    """
     book_to_update = Book.find_book_by_id(id)
     if book_to_update:
         if request.method == "POST":
@@ -115,10 +134,12 @@ def update(id:int):
 
 @app.route("/preferences")
 def preferences():
+    """
+    Route to display user reading preferences including top authors and genre distribution.
+    """
     try:
-        top3_authors = Book.top_authors(3)
-        # Analyse genre distribution
-        top6_genres = Genre.genre_distribution(6)
+        top3_authors = Book.top_authors(3) # Get top 3 authors
+        top6_genres = Genre.genre_distribution(6) # Analyse genre distribution
         chart = draw_radar_chart([g[0] for g in top6_genres], [g[1] for g in top6_genres])
         return render_template("preferences.html", authors=top3_authors, chart=chart.to_html())
     except Exception as e:
@@ -126,8 +147,11 @@ def preferences():
 
 @app.route("/recommend/<int:id>")
 def recommend(id:int):
+    """
+    Route to recommend books similar to a given book by ID.
+    """
     try:
-        book = Book.find_book_by_id(id)
+        book = Book.find_book_by_id(id) # Find the target book
         return render_template("recommendation.html", similar_books = Book.find_similar_books(id), book=book)
     except Exception as e:
         return f"Error: {e}"

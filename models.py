@@ -4,6 +4,7 @@ from sqlalchemy import func
 
 db = SQLAlchemy()
 
+# Association table for the many-to-many relationship between books and genres
 book_genre_table = db.Table(
     'book_genre',
     db.Column('book_id', db.Integer, db.ForeignKey('book.id'), primary_key=True),
@@ -11,6 +12,9 @@ book_genre_table = db.Table(
 )
 
 class Book(db.Model):
+    """
+    Model representing a book, with fields for title, author, year, and a many-to-many relationship with genres.
+    """
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), unique=True, nullable=False)
     author = db.Column(db.String(80), nullable=False)
@@ -34,13 +38,15 @@ class Book(db.Model):
 
     @staticmethod
     def add_new_book(title, author, year, genres):
-        # Check if the book is already existed in the database
+        """
+        Add a new book to the database, including its genres.
+        If a genre does not exist, it will be created.
+        """
         existing_book = Book.find_book_by_title(title)
         if existing_book:
             return f"Book {title} already in the database."
         else:
             new_book = Book(title=title, author=author, year=year)
-            # Add genres to the book
             for g in genres:
                 existing_genre = Genre.find_genre(g)
                 if existing_genre:
@@ -58,6 +64,10 @@ class Book(db.Model):
     
     @staticmethod
     def import_new_book(line):
+        """
+        Import a book from a line in a text file.
+        The line should be in the format: title, author, year, [genre1, genre2, ...].
+        """
         info = [piece.strip() for piece in line.split(",")]
         if len(info) < 4 or '[' not in line or ']' not in line:
             raise ValueError('Invalid file line format.')
@@ -100,6 +110,7 @@ class Book(db.Model):
     
     @staticmethod
     def export_books(filepath):
+        """Export all books to a text file in a specified format."""
         with open(filepath, 'w') as f:
             for book in Book.get_all_books():
                 line = f"{book.title}, {book.author}, {book.year}, {[str(g) for g in book.genres]}\n"
@@ -107,12 +118,16 @@ class Book(db.Model):
     
     @staticmethod
     def top_authors(limit):
+        """Get the top authors based on the number of books in the database."""
         authors = db.session.query(Book.author, func.count(Book.id).label("count")).group_by(Book.author).order_by(func.count(Book.id).desc()).limit(limit).all()
         top_authors = [(author, count) for author, count in authors]
         return top_authors
     
     @staticmethod
     def find_similar_books(id):
+        """
+        Find books similar to a given book based on the author and shared genres.
+        """
         target = Book.find_book_by_id(id)
         if not target:
             return f"Book not found in the database.", 404
@@ -129,6 +144,9 @@ class Book(db.Model):
         return sorted(similar_books, key=(lambda book: 0 if book.author == target.author else 1 + len(target.genres) - len(set(target.genres) & set(book.genres))))[:min(5, len(similar_books))]
 
 class Genre(db.Model):
+    """
+    Model representing a genre, with a unique genre name and its relationship with books.
+    """
     id = db.Column(db.Integer, primary_key=True)
     genre = db.Column(db.String(50), unique=True, nullable=False)
 
@@ -156,5 +174,6 @@ class Genre(db.Model):
     
     @staticmethod
     def genre_distribution(limit):
+        """Get the genre distribution of books, sorted by popularity."""
         genres = db.session.query(Genre.genre, func.count(book_genre_table.c.book_id).label("count")).join(book_genre_table, Genre.id == book_genre_table.c.genre_id).group_by(Genre.genre).order_by(func.count(book_genre_table.c.book_id).desc()).limit(limit).all()
         return genres
