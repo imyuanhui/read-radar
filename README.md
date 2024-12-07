@@ -7,7 +7,7 @@ ReadRadar is a Flask-based web application that allows users to manage their per
 ## Table of Contents
 
 - [Release Version](#release-version)
-- [Tech Stack](#tech-stack)
+- [Tech Stacks](#tech-stacks)
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Project Structure](#project-structure)
