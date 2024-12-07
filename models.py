@@ -125,7 +125,7 @@ class Book(db.Model):
                     for genre in book.genres:
                         if genre in target.genres:
                             similar_books.append(book)
-                            continue
+                            break
         return sorted(similar_books, key=(lambda book: 0 if book.author == target.author else 1 + len(target.genres) - len(set(target.genres) & set(book.genres))))[:min(5, len(similar_books))]
 
 class Genre(db.Model):
