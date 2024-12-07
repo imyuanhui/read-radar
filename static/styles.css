@@ -35,7 +35,7 @@ body {
   }
 }
 
-.content {
+.container {
   position: relative;
   z-index: 1;
   display: flex;
@@ -44,8 +44,10 @@ body {
   align-items: center;
 }
 
-.records {
+.content {
   width: 80%;
+  max-width: 650px;
+  min-width: 500px;
   background-color: white;
   opacity: 0.6;
   color: black;
@@ -55,5 +57,33 @@ body {
   overflow-y: scroll;
   h1 {
     text-align: center;
+  }
+}
+
+.flex-row-centre {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100vh;
+  overflow-y: hidden;
+  padding: 0;
+}
+
+.recommend-header {
+  height: 100%;
+  width: 30%;
+  background-color: rgb(77, 52, 21);
+  color: aliceblue;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.recommend-content {
+  padding: 0 1rem;
+
+  li {
+    margin-bottom: 0.5rem;
   }
 }
