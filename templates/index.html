@@ -73,9 +73,8 @@
       placeholder="Genres (comma-seperated)"
       required
     />
-    <button type="submit" class="btn add-btn">Add a New Record</button>
+    <button type="submit" class="btn">Add a New Record</button>
   </form>
-  <!-- <div>{% include 'upload_form.html' %}</div> -->
   <div class="btns-container">
     <form
       action="/upload"
@@ -84,15 +83,13 @@
       class="upload-form"
     >
       <input type="file" name="file" id="file" required />
-      <button type="submit" class="btn import-btn">
-        Import Records From File
-      </button>
+      <button type="submit" class="btn">Import Records From File</button>
     </form>
     <a href="/download"
       ><button class="btn export-btn">Export All Records</button>
     </a>
     <a href="/preferences"
-      ><button class="btn pre-btn">My Reading Preferences</button></a
+      ><button class="btn">My Reading Preferences</button></a
     >
   </div>
 </div>
