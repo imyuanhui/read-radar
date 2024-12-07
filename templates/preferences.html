@@ -1,18 +1,25 @@
 {% extends 'base.html' %} {% block head %}
 <title>Read Radar</title>
 {% endblock %} {% block body %}
-<h3>Top Authors</h3>
-{% if authors %}
-<ul>
-  {% for author, count in authors %}
-  <li>{{ author }}: {{ count }} books</li>
-  {% endfor %}
-</ul>
-{% else %}
-<p>No authors found in the database.</p>
-{% endif %}
+<div class="content preferences">
+  <h2>Reading Preferences</h2>
+  <div class="authors">
+    <h3>Top Authors</h3>
+    {% if authors %}
+    <ul>
+      {% for author, count in authors %}
+      <li>{{ author }}: {{ count }} books</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No authors found in the database.</p>
+    {% endif %}
+  </div>
 
-<h3>Genre Radar Chart</h3>
-<div>{{ chart | safe }}</div>
+  <div class="genres">
+    <h3>Genre Radar Chart</h3>
+    <div>{{ chart | safe }}</div>
+  </div>
+</div>
 
 {% endblock %}
